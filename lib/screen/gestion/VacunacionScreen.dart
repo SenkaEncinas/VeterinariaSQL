@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:veterinaria/model/request.dart';
+import 'package:veterinaria/service/gestion_service.dart';
 
 class VacunacionScreen extends StatefulWidget {
   const VacunacionScreen({super.key});
@@ -8,31 +10,75 @@ class VacunacionScreen extends StatefulWidget {
 }
 
 class _VacunacionScreenState extends State<VacunacionScreen> {
+  final idMascotaCtrl = TextEditingController();
+  final idVacunaCtrl = TextEditingController();
   final mascotaCtrl = TextEditingController();
   final vacunaCtrl = TextEditingController();
   final fechaCtrl = TextEditingController();
   final veterinarioCtrl = TextEditingController();
+  final loteCtrl = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
+  final _gestionService = GestionService();
 
   bool loading = false;
-//todo cambio
-  void _registrarVacuna() async {
+
+  Future<void> _registrarVacuna() async {
+    if (!_formKey.currentState!.validate()) return;
+
     setState(() => loading = true);
 
-    await Future.delayed(const Duration(seconds: 1)); // Simula API
+    try {
+      final request = VacunaRequest(
+        idMascota: int.parse(idMascotaCtrl.text.trim()),
+        idVacuna: int.parse(idVacunaCtrl.text.trim()),
+        lote: loteCtrl.text.trim(),
+        veterinario: veterinarioCtrl.text.trim(),
+      );
 
-    setState(() => loading = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Vacunación registrada exitosamente"),
-        backgroundColor: Color(0xFF007D8F),
-      ),
-    );
+      final mensaje = await _gestionService.registrarVacuna(request);
 
-    // Limpiar campos
-    mascotaCtrl.clear();
-    vacunaCtrl.clear();
-    fechaCtrl.clear();
-    veterinarioCtrl.clear();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(mensaje ?? "Vacunación registrada exitosamente"),
+          backgroundColor: const Color(0xFF007D8F),
+        ),
+      );
+
+      // Limpiar campos
+      idMascotaCtrl.clear();
+      idVacunaCtrl.clear();
+      mascotaCtrl.clear();
+      vacunaCtrl.clear();
+      fechaCtrl.clear();
+      veterinarioCtrl.clear();
+      loteCtrl.clear();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ocurrió un error: $e'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => loading = false);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    idMascotaCtrl.dispose();
+    idVacunaCtrl.dispose();
+    mascotaCtrl.dispose();
+    vacunaCtrl.dispose();
+    fechaCtrl.dispose();
+    veterinarioCtrl.dispose();
+    loteCtrl.dispose();
+    super.dispose();
   }
 
   @override
@@ -52,7 +98,7 @@ class _VacunacionScreenState extends State<VacunacionScreen> {
           ? const Center(
               child: CircularProgressIndicator(color: Color(0xFF007D8F)),
             )
-          : SingleChildScrollView(
+          : SingleChildScrollView (
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
@@ -115,76 +161,125 @@ class _VacunacionScreenState extends State<VacunacionScreen> {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(25),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _buildTextField(
-                            "Mascota",
-                            mascotaCtrl,
-                            icon: Icons.pets,
-                          ),
-                          const SizedBox(height: 15),
-                          _buildTextField(
-                            "Vacuna",
-                            vacunaCtrl,
-                            icon: Icons.medical_services,
-                          ),
-                          const SizedBox(height: 15),
-                          _buildTextField(
-                            "Fecha de Vacunación",
-                            fechaCtrl,
-                            keyboardType: TextInputType.datetime,
-                            icon: Icons.date_range,
-                          ),
-                          const SizedBox(height: 15),
-                          _buildTextField(
-                            "Veterinario",
-                            veterinarioCtrl,
-                            icon: Icons.person,
-                          ),
-                          const SizedBox(height: 25),
-                          ElevatedButton.icon(
-                            onPressed: _registrarVacuna,
-                            icon: const Icon(Icons.check),
-                            label: const Text("Registrar Vacuna"),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF007D8F),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              textStyle: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildTextField(
+                              "ID Mascota",
+                              idMascotaCtrl,
+                              icon: Icons.pets,
+                              keyboardType: TextInputType.number,
+                              validator: (v) {
+                                if (v == null || v.isEmpty) {
+                                  return 'Ingrese el ID de la mascota';
+                                }
+                                if (int.tryParse(v) == null) {
+                                  return 'Debe ser un número entero';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 15),
+                            _buildTextField(
+                              "ID Vacuna",
+                              idVacunaCtrl,
+                              icon: Icons.tag,
+                              keyboardType: TextInputType.number,
+                              validator: (v) {
+                                if (v == null || v.isEmpty) {
+                                  return 'Ingrese el ID de la vacuna';
+                                }
+                                if (int.tryParse(v) == null) {
+                                  return 'Debe ser un número entero';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 15),
+                            _buildTextField(
+                              "Mascota (nombre, solo referencia visual)",
+                              mascotaCtrl,
+                              icon: Icons.pets,
+                            ),
+                            const SizedBox(height: 15),
+                            _buildTextField(
+                              "Vacuna (nombre, solo referencia visual)",
+                              vacunaCtrl,
+                              icon: Icons.medical_services,
+                            ),
+                            const SizedBox(height: 15),
+                            _buildTextField(
+                              "Fecha de Vacunación (opcional)",
+                              fechaCtrl,
+                              keyboardType: TextInputType.datetime,
+                              icon: Icons.date_range,
+                            ),
+                            const SizedBox(height: 15),
+                            _buildTextField(
+                              "Lote",
+                              loteCtrl,
+                              icon: Icons.confirmation_number,
+                              validator: (v) => v == null || v.isEmpty
+                                  ? 'Ingrese el lote'
+                                  : null,
+                            ),
+                            const SizedBox(height: 15),
+                            _buildTextField(
+                              "Veterinario",
+                              veterinarioCtrl,
+                              icon: Icons.person,
+                              validator: (v) => v == null || v.isEmpty
+                                  ? 'Ingrese el veterinario'
+                                  : null,
+                            ),
+                            const SizedBox(height: 25),
+                            ElevatedButton.icon(
+                              onPressed: _registrarVacuna,
+                              icon: const Icon(Icons.check),
+                              label: const Text("Registrar Vacuna"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF007D8F),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                textStyle: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 15),
-                          OutlinedButton.icon(
-                            onPressed: () => Navigator.pop(context),
-                            icon: const Icon(
-                              Icons.arrow_back,
-                              color: Color(0xFF007D8F),
-                            ),
-                            label: const Text(
-                              "Volver",
-                              style: TextStyle(
+                            const SizedBox(height: 15),
+                            OutlinedButton.icon(
+                              onPressed: () => Navigator.pop(context),
+                              icon: const Icon(
+                                Icons.arrow_back,
                                 color: Color(0xFF007D8F),
-                                fontWeight: FontWeight.bold,
+                              ),
+                              label: const Text(
+                                "Volver",
+                                style: TextStyle(
+                                  color: Color(0xFF007D8F),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(
+                                  color: Color(0xFF007D8F),
+                                  width: 2,
+                                ),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                             ),
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(
-                                color: Color(0xFF007D8F),
-                                width: 2,
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -199,17 +294,18 @@ class _VacunacionScreenState extends State<VacunacionScreen> {
     TextEditingController controller, {
     TextInputType keyboardType = TextInputType.text,
     IconData? icon,
+    String? Function(String?)? validator,
   }) {
-    return TextField(
+    return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
+      validator: validator,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
         fillColor: Colors.white,
-        prefixIcon: icon != null
-            ? Icon(icon, color: const Color(0xFF007D8F))
-            : null,
+        prefixIcon:
+            icon != null ? Icon(icon, color: const Color(0xFF007D8F)) : null,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 15,
           vertical: 14,

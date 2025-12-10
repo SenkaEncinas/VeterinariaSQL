@@ -1,126 +1,179 @@
 import 'package:flutter/material.dart';
 import 'package:veterinaria/service/reportes_service.dart';
+import 'estado_cuentas_screen.dart';
+import 'auditoria_alertas_screen.dart';
+import 'seguimiento_visitas_screen.dart';
 
-class ReportesScreen extends StatefulWidget {
+class ReportesScreen extends StatelessWidget {
   const ReportesScreen({super.key});
-
-  @override
-  State<ReportesScreen> createState() => _ReportesScreenState();
-}
-
-class _ReportesScreenState extends State<ReportesScreen> {
-  final _service = ReportesService();
-  bool loading = false;
-
-  List<Map<String, dynamic>> estadoCuentas = [];
-  List<Map<String, dynamic>> auditoriaAlertas = [];
-  List<Map<String, dynamic>> seguimientoVisitas = [];
-
-  Future<void> _getEstadoCuentas() async {
-    setState(() => loading = true);
-    try {
-      final data = await _service.getEstadoCuentas();
-      setState(() => estadoCuentas = data);
-    } catch (e) {
-      _showMessage(e.toString());
-    }
-    setState(() => loading = false);
-  }
-
-  Future<void> _getAuditoriaAlertas() async {
-    setState(() => loading = true);
-    try {
-      final data = await _service.getAuditoriaAlertas();
-      setState(() => auditoriaAlertas = data);
-    } catch (e) {
-      _showMessage(e.toString());
-    }
-    setState(() => loading = false);
-  }
-
-  Future<void> _getSeguimientoVisitas() async {
-    setState(() => loading = true);
-    try {
-      final data = await _service.getSeguimientoVisitas();
-      setState(() => seguimientoVisitas = data);
-    } catch (e) {
-      _showMessage(e.toString());
-    }
-    setState(() => loading = false);
-  }
-
-  void _showMessage(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-  }
-
-  Widget _buildList(String title, List<Map<String, dynamic>> items) {
-    if (items.isEmpty) return const SizedBox();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 10),
-        ...items.map(
-          (e) => Card(
-            child: ListTile(
-              title: Text(e.keys.join(", ")),
-              subtitle: Text(e.values.join(", ")),
-            ),
-          ),
-        ),
-        const SizedBox(height: 20),
-      ],
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFE8F0F2),
       appBar: AppBar(
         title: const Text("Reportes"),
         centerTitle: true,
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: const Color(0xFF007D8F),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
-      body: loading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // HEADER CON GRADIENTE
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(25),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF7289DA), Color(0xFF007D8F)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+              ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  ElevatedButton(
-                    onPressed: _getEstadoCuentas,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
-                    ),
-                    child: const Text("Estado de Cuentas Rescatados"),
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: const [
+                  Icon(
+                    Icons.analytics,
+                    size: 60,
+                    color: Colors.white,
                   ),
-                  const SizedBox(height: 10),
-                  _buildList("Estado de Cuentas", estadoCuentas),
-                  ElevatedButton(
-                    onPressed: _getAuditoriaAlertas,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
+                  SizedBox(height: 10),
+                  Text(
+                    "Reportes y Monitoreo",
+                    style: TextStyle(
+                      fontSize: 22,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
-                    child: const Text("Auditoría Alertas"),
+                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 10),
-                  _buildList("Auditoría Alertas", auditoriaAlertas),
-                  ElevatedButton(
-                    onPressed: _getSeguimientoVisitas,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
+                  SizedBox(height: 5),
+                  Text(
+                    "Consulta estados de cuenta, auditorías y seguimiento de visitas.",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w400,
                     ),
-                    child: const Text("Seguimiento Visitas"),
+                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 10),
-                  _buildList("Seguimiento Visitas", seguimientoVisitas),
                 ],
               ),
             ),
+
+            const SizedBox(height: 25),
+
+            _ReporteCard(
+              title: "Estado de Cuentas Rescatados",
+              icon: Icons.account_balance_wallet,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const EstadoCuentasScreen(),
+                  ),
+                );
+              },
+            ),
+
+            _ReporteCard(
+              title: "Auditoría de Alertas",
+              icon: Icons.warning_amber_rounded,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AuditoriaAlertasScreen(),
+                  ),
+                );
+              },
+            ),
+
+            _ReporteCard(
+              title: "Seguimiento de Visitas",
+              icon: Icons.track_changes,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const SeguimientoVisitasScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReporteCard extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _ReporteCard({
+    super.key,
+    required this.title,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          elevation: 8,
+          shadowColor: Colors.black26,
+          child: Container(
+            height: 70,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF7289DA), Color(0xFF007D8F)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, color: Colors.white, size: 28),
+                  const SizedBox(width: 10),
+                  Flexible(
+                    child: Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
