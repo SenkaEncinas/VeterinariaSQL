@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:veterinaria/model/request.dart';
+import 'package:veterinaria/service/gestion_service.dart';
 
 class AporteScreen extends StatefulWidget {
   const AporteScreen({super.key});
@@ -8,31 +10,68 @@ class AporteScreen extends StatefulWidget {
 }
 
 class _AporteScreenState extends State<AporteScreen> {
-  final nombreCtrl = TextEditingController();
-  final cantidadCtrl = TextEditingController();
+  final idMecenasCtrl = TextEditingController();
+  final idMascotaCtrl = TextEditingController();
+  final montoCtrl = TextEditingController();
   final metodoCtrl = TextEditingController();
-  final fechaCtrl = TextEditingController();
+  final comprobanteCtrl = TextEditingController();
+
+  final GestionService _service = GestionService();
 
   bool loading = false;
 
-  void _registrarAporte() async {
+  Future<void> _registrar() async {
+    if (idMecenasCtrl.text.isEmpty ||
+        montoCtrl.text.isEmpty ||
+        metodoCtrl.text.isEmpty ||
+        comprobanteCtrl.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Completa los campos obligatorios"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     setState(() => loading = true);
 
-    await Future.delayed(const Duration(seconds: 1)); // Simula API
+    try {
+      final req = AporteRequest(
+        idMecenas: int.parse(idMecenasCtrl.text),
+        idMascota: idMascotaCtrl.text.isEmpty
+            ? null
+            : int.tryParse(idMascotaCtrl.text),
+        monto: double.parse(montoCtrl.text),
+        metodoPago: metodoCtrl.text,
+        comprobante: comprobanteCtrl.text,
+      );
 
-    setState(() => loading = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Aporte registrado exitosamente"),
-        backgroundColor: Color(0xFF007D8F),
-      ),
-    );
+      final mensaje = await _service.registrarAporte(req);
 
-    // Limpiar campos
-    nombreCtrl.clear();
-    cantidadCtrl.clear();
-    metodoCtrl.clear();
-    fechaCtrl.clear();
+      setState(() => loading = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(mensaje ?? "Aporte registrado"),
+          backgroundColor: const Color(0xFF007D8F),
+        ),
+      );
+
+      idMecenasCtrl.clear();
+      idMascotaCtrl.clear();
+      montoCtrl.clear();
+      metodoCtrl.clear();
+      comprobanteCtrl.clear();
+    } catch (e) {
+      setState(() => loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error: ${e.toString()}"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -42,11 +81,6 @@ class _AporteScreenState extends State<AporteScreen> {
       appBar: AppBar(
         title: const Text("Registrar Aporte"),
         backgroundColor: const Color(0xFF007D8F),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
       ),
       body: loading
           ? const Center(
@@ -56,9 +90,7 @@ class _AporteScreenState extends State<AporteScreen> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  // ==========================
-                  // HEADER CON ICONO
-                  // ==========================
+                  // Header
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(25),
@@ -71,31 +103,25 @@ class _AporteScreenState extends State<AporteScreen> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: const [
                         Icon(
-                          Icons.monetization_on,
+                          Icons.volunteer_activism,
                           size: 60,
                           color: Colors.white,
                         ),
                         SizedBox(height: 10),
                         Text(
-                          "Formulario de Aporte",
+                          "Registrar Aporte de Mecenas",
                           style: TextStyle(
                             fontSize: 22,
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
-                          textAlign: TextAlign.center,
                         ),
                         SizedBox(height: 5),
                         Text(
-                          "Registra los aportes de los mecenas de manera rápida y segura.",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white70,
-                            fontWeight: FontWeight.w400,
-                          ),
+                          "Ingresa los datos del aporte realizado.",
+                          style: TextStyle(fontSize: 14, color: Colors.white70),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -104,48 +130,52 @@ class _AporteScreenState extends State<AporteScreen> {
 
                   const SizedBox(height: 25),
 
-                  // ==========================
-                  // FORMULARIO
-                  // ==========================
+                  // FORM
                   Card(
                     elevation: 8,
-                    shadowColor: Colors.black26,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(25),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          _buildTextField(
-                            "Nombre del Mecenas",
-                            nombreCtrl,
-                            icon: Icons.person,
+                          _campo(
+                            "ID del Mecenas (obligatorio)",
+                            idMecenasCtrl,
+                            Icons.person,
+                            tipo: TextInputType.number,
                           ),
                           const SizedBox(height: 15),
-                          _buildTextField(
-                            "Cantidad",
-                            cantidadCtrl,
-                            keyboardType: TextInputType.number,
-                            icon: Icons.attach_money,
+
+                          _campo(
+                            "ID de Mascota (opcional)",
+                            idMascotaCtrl,
+                            Icons.pets,
+                            tipo: TextInputType.number,
                           ),
                           const SizedBox(height: 15),
-                          _buildTextField(
-                            "Método de Pago",
-                            metodoCtrl,
-                            icon: Icons.payment,
+
+                          _campo(
+                            "Monto",
+                            montoCtrl,
+                            Icons.monetization_on,
+                            tipo: TextInputType.number,
                           ),
                           const SizedBox(height: 15),
-                          _buildTextField(
-                            "Fecha del Aporte",
-                            fechaCtrl,
-                            keyboardType: TextInputType.datetime,
-                            icon: Icons.date_range,
+
+                          _campo("Método de Pago", metodoCtrl, Icons.payment),
+                          const SizedBox(height: 15),
+
+                          _campo(
+                            "Comprobante (URL / código)",
+                            comprobanteCtrl,
+                            Icons.receipt_long,
                           ),
                           const SizedBox(height: 25),
+
                           ElevatedButton.icon(
-                            onPressed: _registrarAporte,
+                            onPressed: _registrar,
                             icon: const Icon(Icons.check),
                             label: const Text("Registrar Aporte"),
                             style: ElevatedButton.styleFrom(
@@ -154,13 +184,11 @@ class _AporteScreenState extends State<AporteScreen> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              textStyle: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
                             ),
                           ),
+
                           const SizedBox(height: 15),
+
                           OutlinedButton.icon(
                             onPressed: () => Navigator.pop(context),
                             icon: const Icon(
@@ -180,9 +208,6 @@ class _AporteScreenState extends State<AporteScreen> {
                                 width: 2,
                               ),
                               padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
                             ),
                           ),
                         ],
@@ -195,26 +220,20 @@ class _AporteScreenState extends State<AporteScreen> {
     );
   }
 
-  Widget _buildTextField(
+  Widget _campo(
     String label,
-    TextEditingController controller, {
-    TextInputType keyboardType = TextInputType.text,
-    IconData? icon,
+    TextEditingController controller,
+    IconData icon, {
+    TextInputType tipo = TextInputType.text,
   }) {
     return TextField(
       controller: controller,
-      keyboardType: keyboardType,
+      keyboardType: tipo,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
         fillColor: Colors.white,
-        prefixIcon: icon != null
-            ? Icon(icon, color: const Color(0xFF007D8F))
-            : null,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 15,
-          vertical: 14,
-        ),
+        prefixIcon: Icon(icon, color: const Color(0xFF007D8F)),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
