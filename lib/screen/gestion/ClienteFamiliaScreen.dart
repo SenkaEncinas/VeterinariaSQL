@@ -1,4 +1,8 @@
+// lib/screens/cliente_familia_screen.dart
+
 import 'package:flutter/material.dart';
+import 'package:veterinaria/model/request.dart';
+import 'package:veterinaria/service/gestion_service.dart';
 
 class ClienteFamiliaScreen extends StatefulWidget {
   const ClienteFamiliaScreen({super.key});
@@ -10,29 +14,76 @@ class ClienteFamiliaScreen extends StatefulWidget {
 class _ClienteFamiliaScreenState extends State<ClienteFamiliaScreen> {
   final nombreCtrl = TextEditingController();
   final apellidoCtrl = TextEditingController();
-  final contactoCtrl = TextEditingController();
+  final dniCtrl = TextEditingController();
+  final telefonoCtrl = TextEditingController();
+  final emailCtrl = TextEditingController();
+  final cuentaBancariaCtrl = TextEditingController();
   final direccionCtrl = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
+  final _gestionService = GestionService();
 
   bool loading = false;
 
-  void _registrarClienteFamilia() async {
+  Future<void> _registrarClienteFamilia() async {
+    if (!_formKey.currentState!.validate()) return;
+
     setState(() => loading = true);
 
-    await Future.delayed(const Duration(seconds: 1)); // Simula API
+    try {
+      final request = ClienteFamiliaRequest(
+        apellidoCabeza: apellidoCtrl.text.trim(),
+        cuentaBancaria: cuentaBancariaCtrl.text.trim(),
+        direccion: direccionCtrl.text.trim(),
+        telefono: telefonoCtrl.text.trim(),
+        email: emailCtrl.text.trim(),
+        dniCabeza: dniCtrl.text.trim(),
+        nombreCabeza: nombreCtrl.text.trim(),
+      );
 
-    setState(() => loading = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Cliente de familia registrado exitosamente"),
-        backgroundColor: Color(0xFF007D8F),
-      ),
-    );
+      final mensaje = await _gestionService.registrarFamilia(request);
 
-    // Limpiar campos
-    nombreCtrl.clear();
-    apellidoCtrl.clear();
-    contactoCtrl.clear();
-    direccionCtrl.clear();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(mensaje ?? 'Cliente de familia registrado exitosamente'),
+          backgroundColor: const Color(0xFF007D8F),
+        ),
+      );
+
+      // Limpiar campos
+      nombreCtrl.clear();
+      apellidoCtrl.clear();
+      dniCtrl.clear();
+      telefonoCtrl.clear();
+      emailCtrl.clear();
+      cuentaBancariaCtrl.clear();
+      direccionCtrl.clear();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ocurrió un error: $e'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => loading = false);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    nombreCtrl.dispose();
+    apellidoCtrl.dispose();
+    dniCtrl.dispose();
+    telefonoCtrl.dispose();
+    emailCtrl.dispose();
+    cuentaBancariaCtrl.dispose();
+    direccionCtrl.dispose();
+    super.dispose();
   }
 
   @override
@@ -115,75 +166,128 @@ class _ClienteFamiliaScreenState extends State<ClienteFamiliaScreen> {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(25),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _buildTextField(
-                            "Nombre",
-                            nombreCtrl,
-                            icon: Icons.person,
-                          ),
-                          const SizedBox(height: 15),
-                          _buildTextField(
-                            "Apellido",
-                            apellidoCtrl,
-                            icon: Icons.person_outline,
-                          ),
-                          const SizedBox(height: 15),
-                          _buildTextField(
-                            "Contacto",
-                            contactoCtrl,
-                            icon: Icons.phone,
-                          ),
-                          const SizedBox(height: 15),
-                          _buildTextField(
-                            "Dirección",
-                            direccionCtrl,
-                            icon: Icons.location_city,
-                          ),
-                          const SizedBox(height: 25),
-                          ElevatedButton.icon(
-                            onPressed: _registrarClienteFamilia,
-                            icon: const Icon(Icons.check),
-                            label: const Text("Registrar Cliente"),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF007D8F),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              textStyle: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildTextField(
+                              "Nombre",
+                              nombreCtrl,
+                              icon: Icons.person,
+                              validator: (v) => v == null || v.isEmpty
+                                  ? 'Ingrese el nombre'
+                                  : null,
+                            ),
+                            const SizedBox(height: 15),
+                            _buildTextField(
+                              "Apellido",
+                              apellidoCtrl,
+                              icon: Icons.person_outline,
+                              validator: (v) => v == null || v.isEmpty
+                                  ? 'Ingrese el apellido'
+                                  : null,
+                            ),
+                            const SizedBox(height: 15),
+                            _buildTextField(
+                              "DNI",
+                              dniCtrl,
+                              icon: Icons.badge,
+                              keyboardType: TextInputType.number,
+                              validator: (v) => v == null || v.isEmpty
+                                  ? 'Ingrese el DNI'
+                                  : null,
+                            ),
+                            const SizedBox(height: 15),
+                            _buildTextField(
+                              "Teléfono",
+                              telefonoCtrl,
+                              icon: Icons.phone,
+                              keyboardType: TextInputType.phone,
+                              validator: (v) => v == null || v.isEmpty
+                                  ? 'Ingrese el teléfono'
+                                  : null,
+                            ),
+                            const SizedBox(height: 15),
+                            _buildTextField(
+                              "Email",
+                              emailCtrl,
+                              icon: Icons.email,
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (v) {
+                                if (v == null || v.isEmpty) {
+                                  return 'Ingrese el email';
+                                }
+                                if (!v.contains('@')) {
+                                  return 'Email no válido';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 15),
+                            _buildTextField(
+                              "Cuenta Bancaria",
+                              cuentaBancariaCtrl,
+                              icon: Icons.account_balance,
+                              validator: (v) => v == null || v.isEmpty
+                                  ? 'Ingrese la cuenta bancaria'
+                                  : null,
+                            ),
+                            const SizedBox(height: 15),
+                            _buildTextField(
+                              "Dirección",
+                              direccionCtrl,
+                              icon: Icons.location_city,
+                              validator: (v) => v == null || v.isEmpty
+                                  ? 'Ingrese la dirección'
+                                  : null,
+                            ),
+                            const SizedBox(height: 25),
+                            ElevatedButton.icon(
+                              onPressed: _registrarClienteFamilia,
+                              icon: const Icon(Icons.check),
+                              label: const Text("Registrar Cliente"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF007D8F),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                textStyle: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 15),
-                          OutlinedButton.icon(
-                            onPressed: () => Navigator.pop(context),
-                            icon: const Icon(
-                              Icons.arrow_back,
-                              color: Color(0xFF007D8F),
-                            ),
-                            label: const Text(
-                              "Volver",
-                              style: TextStyle(
+                            const SizedBox(height: 15),
+                            OutlinedButton.icon(
+                              onPressed: () => Navigator.pop(context),
+                              icon: const Icon(
+                                Icons.arrow_back,
                                 color: Color(0xFF007D8F),
-                                fontWeight: FontWeight.bold,
+                              ),
+                              label: const Text(
+                                "Volver",
+                                style: TextStyle(
+                                  color: Color(0xFF007D8F),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(
+                                  color: Color(0xFF007D8F),
+                                  width: 2,
+                                ),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                             ),
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(
-                                color: Color(0xFF007D8F),
-                                width: 2,
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -198,17 +302,18 @@ class _ClienteFamiliaScreenState extends State<ClienteFamiliaScreen> {
     TextEditingController controller, {
     TextInputType keyboardType = TextInputType.text,
     IconData? icon,
+    String? Function(String?)? validator,
   }) {
-    return TextField(
+    return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
+      validator: validator,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
         fillColor: Colors.white,
-        prefixIcon: icon != null
-            ? Icon(icon, color: const Color(0xFF007D8F))
-            : null,
+        prefixIcon:
+            icon != null ? Icon(icon, color: const Color(0xFF007D8F)) : null,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 15,
           vertical: 14,

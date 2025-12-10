@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:veterinaria/model/request.dart';
+import 'package:veterinaria/service/gestion_service.dart';
 
 class ConsumoRefugioScreen extends StatefulWidget {
   const ConsumoRefugioScreen({super.key});
@@ -8,31 +10,76 @@ class ConsumoRefugioScreen extends StatefulWidget {
 }
 
 class _ConsumoRefugioScreenState extends State<ConsumoRefugioScreen> {
+  // Controllers visibles en el UI original
   final itemCtrl = TextEditingController();
   final cantidadCtrl = TextEditingController();
   final fechaCtrl = TextEditingController();
   final responsableCtrl = TextEditingController();
 
+  // Nuevos controllers para los IDs reales del backend
+  final idMascotaCtrl = TextEditingController();
+  final idServicioCtrl = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
+  final _gestionService = GestionService();
+
   bool loading = false;
 
-  void _registrarConsumo() async {
+  Future<void> _registrarConsumo() async {
+    if (!_formKey.currentState!.validate()) return;
+
     setState(() => loading = true);
 
-    await Future.delayed(const Duration(seconds: 1)); // Simula API
+    try {
+      final request = ConsumoRefugioRequest(
+        idMascota: int.parse(idMascotaCtrl.text.trim()),
+        idServicio: int.parse(idServicioCtrl.text.trim()),
+        cantidad: int.parse(cantidadCtrl.text.trim()),
+        observaciones:
+            'Item: ${itemCtrl.text.trim()} | Fecha: ${fechaCtrl.text.trim()} | Responsable: ${responsableCtrl.text.trim()}',
+      );
 
-    setState(() => loading = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Consumo registrado exitosamente"),
-        backgroundColor: Color(0xFF007D8F),
-      ),
-    );
+      final mensaje = await _gestionService.registrarConsumo(request);
 
-    // Limpiar campos
-    itemCtrl.clear();
-    cantidadCtrl.clear();
-    fechaCtrl.clear();
-    responsableCtrl.clear();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(mensaje ?? "Consumo registrado exitosamente"),
+          backgroundColor: const Color(0xFF007D8F),
+        ),
+      );
+
+      // Limpiar campos
+      itemCtrl.clear();
+      cantidadCtrl.clear();
+      fechaCtrl.clear();
+      responsableCtrl.clear();
+      idMascotaCtrl.clear();
+      idServicioCtrl.clear();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ocurrió un error: $e'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => loading = false);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    itemCtrl.dispose();
+    cantidadCtrl.dispose();
+    fechaCtrl.dispose();
+    responsableCtrl.dispose();
+    idMascotaCtrl.dispose();
+    idServicioCtrl.dispose();
+    super.dispose();
   }
 
   @override
@@ -111,77 +158,126 @@ class _ConsumoRefugioScreenState extends State<ConsumoRefugioScreen> {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(25),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _buildTextField(
-                            "Item Consumido",
-                            itemCtrl,
-                            icon: Icons.category,
-                          ),
-                          const SizedBox(height: 15),
-                          _buildTextField(
-                            "Cantidad",
-                            cantidadCtrl,
-                            keyboardType: TextInputType.number,
-                            icon: Icons.format_list_numbered,
-                          ),
-                          const SizedBox(height: 15),
-                          _buildTextField(
-                            "Fecha de Consumo",
-                            fechaCtrl,
-                            keyboardType: TextInputType.datetime,
-                            icon: Icons.date_range,
-                          ),
-                          const SizedBox(height: 15),
-                          _buildTextField(
-                            "Responsable",
-                            responsableCtrl,
-                            icon: Icons.person,
-                          ),
-                          const SizedBox(height: 25),
-                          ElevatedButton.icon(
-                            onPressed: _registrarConsumo,
-                            icon: const Icon(Icons.check),
-                            label: const Text("Registrar Consumo"),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF007D8F),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              textStyle: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildTextField(
+                              "ID Mascota",
+                              idMascotaCtrl,
+                              icon: Icons.pets,
+                              keyboardType: TextInputType.number,
+                              validator: (v) {
+                                if (v == null || v.isEmpty) {
+                                  return 'Ingrese el ID de la mascota';
+                                }
+                                if (int.tryParse(v) == null) {
+                                  return 'Debe ser un número entero';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 15),
+                            _buildTextField(
+                              "ID Servicio",
+                              idServicioCtrl,
+                              icon: Icons.build,
+                              keyboardType: TextInputType.number,
+                              validator: (v) {
+                                if (v == null || v.isEmpty) {
+                                  return 'Ingrese el ID del servicio';
+                                }
+                                if (int.tryParse(v) == null) {
+                                  return 'Debe ser un número entero';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 15),
+                            _buildTextField(
+                              "Item Consumido",
+                              itemCtrl,
+                              icon: Icons.category,
+                              validator: (v) => v == null || v.isEmpty
+                                  ? 'Ingrese el ítem consumido'
+                                  : null,
+                            ),
+                            const SizedBox(height: 15),
+                            _buildTextField(
+                              "Cantidad",
+                              cantidadCtrl,
+                              keyboardType: TextInputType.number,
+                              icon: Icons.format_list_numbered,
+                              validator: (v) {
+                                if (v == null || v.isEmpty) {
+                                  return 'Ingrese la cantidad';
+                                }
+                                if (int.tryParse(v) == null) {
+                                  return 'Debe ser un número entero';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 15),
+                            _buildTextField(
+                              "Fecha de Consumo",
+                              fechaCtrl,
+                              keyboardType: TextInputType.datetime,
+                              icon: Icons.date_range,
+                            ),
+                            const SizedBox(height: 15),
+                            _buildTextField(
+                              "Responsable",
+                              responsableCtrl,
+                              icon: Icons.person,
+                            ),
+                            const SizedBox(height: 25),
+                            ElevatedButton.icon(
+                              onPressed: _registrarConsumo,
+                              icon: const Icon(Icons.check),
+                              label: const Text("Registrar Consumo"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF007D8F),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                textStyle: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 15),
-                          OutlinedButton.icon(
-                            onPressed: () => Navigator.pop(context),
-                            icon: const Icon(
-                              Icons.arrow_back,
-                              color: Color(0xFF007D8F),
-                            ),
-                            label: const Text(
-                              "Volver",
-                              style: TextStyle(
+                            const SizedBox(height: 15),
+                            OutlinedButton.icon(
+                              onPressed: () => Navigator.pop(context),
+                              icon: const Icon(
+                                Icons.arrow_back,
                                 color: Color(0xFF007D8F),
-                                fontWeight: FontWeight.bold,
+                              ),
+                              label: const Text(
+                                "Volver",
+                                style: TextStyle(
+                                  color: Color(0xFF007D8F),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(
+                                  color: Color(0xFF007D8F),
+                                  width: 2,
+                                ),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                             ),
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(
-                                color: Color(0xFF007D8F),
-                                width: 2,
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -196,17 +292,18 @@ class _ConsumoRefugioScreenState extends State<ConsumoRefugioScreen> {
     TextEditingController controller, {
     TextInputType keyboardType = TextInputType.text,
     IconData? icon,
+    String? Function(String?)? validator,
   }) {
-    return TextField(
+    return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
+      validator: validator,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
         fillColor: Colors.white,
-        prefixIcon: icon != null
-            ? Icon(icon, color: const Color(0xFF007D8F))
-            : null,
+        prefixIcon:
+            icon != null ? Icon(icon, color: const Color(0xFF007D8F)) : null,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 15,
           vertical: 14,
