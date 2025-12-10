@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:veterinaria/service/reportes_service.dart';
 import 'estado_cuentas_screen.dart';
 import 'auditoria_alertas_screen.dart';
 import 'seguimiento_visitas_screen.dart';
+import 'oportunidades_adopcion_screen.dart';
 
 class ReportesScreen extends StatelessWidget {
   const ReportesScreen({super.key});
@@ -58,7 +58,7 @@ class ReportesScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 5),
                   Text(
-                    "Consulta estados de cuenta, auditorías y seguimiento de visitas.",
+                    "Consulta estados de cuenta, auditorías, seguimiento de visitas y oportunidades de adopción.",
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.white70,
@@ -106,6 +106,19 @@ class ReportesScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (_) => const SeguimientoVisitasScreen(),
+                  ),
+                );
+              },
+            ),
+
+            _ReporteCard(
+              title: "Oportunidades de Adopción",
+              icon: Icons.volunteer_activism,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const OportunidadesAdopcionScreen(),
                   ),
                 );
               },

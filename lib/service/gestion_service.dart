@@ -7,8 +7,8 @@ import 'package:veterinaria/model/request.dart';
 
 class GestionService {
   final String _baseUrl =
-      'https://10.0.2.2:5260/api/Gestion'; // Cambia al URL real
-
+      'http://localhost:5260/api/Gestion'; // Cambia al URL real
+//'https://10.0.2.2:5260/api/Gestion';
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
@@ -174,19 +174,61 @@ class GestionService {
   }
 
   // ===================== ACTUALIZAR PESO =====================
-  Future<String?> actualizarPeso(PesoRequest req) async {
-    final token = await _getToken();
+Future<String?> actualizarPeso(PesoRequest req) async {
+  final token = await _getToken();
+  final url = '$_baseUrl/actualizar-peso';
+  final uri = Uri.parse(url);
+  final bodyJson = jsonEncode(req.toJson());
+
+  print('👉 [actualizarPeso] URL: $url');
+  print('👉 [actualizarPeso] Headers: ${_headers(token)}');
+  print('👉 [actualizarPeso] Body enviado: $bodyJson');
+
+  try {
     final response = await http.post(
-      Uri.parse('$_baseUrl/actualizar-peso'),
+      uri,
       headers: _headers(token),
-      body: jsonEncode(req.toJson()),
+      body: bodyJson,
     );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return data['mensaje'];
+    print('👀 [actualizarPeso] Status code: ${response.statusCode}');
+    print('👀 [actualizarPeso] Body respuesta crudo: ${response.body}');
+
+    // tomamos 200 y 201 como éxito
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      if (response.body.isEmpty) {
+        print('⚠️ [actualizarPeso] Respuesta sin body');
+        return null; // o un mensaje fijo tipo 'OK'
+      }
+
+      try {
+        final data = jsonDecode(response.body);
+        print('👀 [actualizarPeso] JSON decodificado: $data');
+
+        if (data is Map && data.containsKey('mensaje')) {
+          return data['mensaje']?.toString();
+        } else {
+          print('⚠️ [actualizarPeso] No existe la clave "mensaje" en el JSON');
+          // devolvemos el body tal cual por si es un texto
+          return response.body;
+        }
+      } catch (e, st) {
+        print('💥 [actualizarPeso] Error en jsonDecode: $e');
+        print(st);
+        // Si el backend devuelve texto plano, devolvemos eso
+        return response.body;
+      }
     } else {
-      throw Exception('Error actualizando peso');
+      // error HTTP (400, 404, 500, etc.)
+      throw Exception(
+        '[actualizarPeso] Error HTTP ${response.statusCode}: ${response.body}',
+      );
     }
+  } catch (e, st) {
+    print('💥 [actualizarPeso] EXCEPCIÓN: $e');
+    print(st);
+    rethrow;
   }
+}
+
 }
