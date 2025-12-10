@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:veterinaria/model/report.dart'; // 👈 ajusta ruta si es distinta
 
 class ReportesService {
-  final String _baseUrl = 'https://tu-api.com/api/Reportes';
+  final String _baseUrl = 'https://10.0.2.2:5260/api/Reportes';
 
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();

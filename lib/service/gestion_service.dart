@@ -7,7 +7,7 @@ import 'package:veterinaria/model/request.dart';
 
 class GestionService {
   final String _baseUrl =
-      'https://tu-api.com/api/Gestion'; // Cambia al URL real
+      'https://10.0.2.2:5260/api/Gestion'; // Cambia al URL real
 
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();

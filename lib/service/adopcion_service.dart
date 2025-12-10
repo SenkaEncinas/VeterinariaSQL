@@ -8,7 +8,7 @@ import 'package:veterinaria/model/request.dart';
 
 class AdopcionesService {
   final String _baseUrl =
-      'https://tu-api.com/api/Adopciones'; // Cambia al URL real
+      'https://10.0.2.2:5260/api/Adopciones'; // Cambia al URL real
 
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
