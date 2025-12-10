@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'estado_cuentas_screen.dart';
 import 'auditoria_alertas_screen.dart';
 import 'seguimiento_visitas_screen.dart';
-import 'oportunidades_adopcion_screen.dart';
+import 'pagos_bonificaciones_screen.dart'; // 👈 nueva pantalla de bonos
 
 class ReportesScreen extends StatelessWidget {
   const ReportesScreen({super.key});
@@ -58,7 +58,7 @@ class ReportesScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 5),
                   Text(
-                    "Consulta estados de cuenta, auditorías, seguimiento de visitas y oportunidades de adopción.",
+                    "Consulta estados de cuenta, auditorías, seguimiento de visitas y bonos a pagar.",
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.white70,
@@ -112,13 +112,13 @@ class ReportesScreen extends StatelessWidget {
             ),
 
             _ReporteCard(
-              title: "Oportunidades de Adopción",
-              icon: Icons.volunteer_activism,
+              title: "Pagos y Bonificaciones",
+              icon: Icons.payments,
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const OportunidadesAdopcionScreen(),
+                    builder: (_) => const PagosBonificacionesScreen(),
                   ),
                 );
               },

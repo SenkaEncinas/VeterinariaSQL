@@ -56,8 +56,8 @@ class EstadoCuentaRescatado {
       totalGastosMedicos: (json['Total_Gastos_Medicos'] ?? 0).toDouble(),
       totalGastosRefugio: (json['Total_Gastos_Refugio'] ?? 0).toDouble(),
       totalDonaciones: (json['Total_Donaciones'] ?? 0).toDouble(),
-      saldoPendientePorCubrir: (json['Saldo_Pendiente_Por_Cubrir'] ?? 0)
-          .toDouble(),
+      saldoPendientePorCubrir:
+          (json['Saldo_Pendiente_Por_Cubrir'] ?? 0).toDouble(),
     );
   }
 }
@@ -113,6 +113,31 @@ class SeguimientoVisita {
       quienVisito: json['Quien_Visito'] ?? '',
       resultado: json['Resultado'] ?? '',
       estadoVisita: json['Estado_Visita'] ?? '',
+    );
+  }
+}
+
+// BonoVeterinario  (para api/Reportes/pagos-bonificaciones)
+class BonoVeterinario {
+  final int id;                // Id del registro o del veterinario
+  final String veterinario;    // Nombre del veterinario
+  final double montoBono;      // Monto a pagar
+  final String periodo;        // Ej: "2025-01", "Enero 2025"
+
+  BonoVeterinario({
+    required this.id,
+    required this.veterinario,
+    required this.montoBono,
+    required this.periodo,
+  });
+
+  factory BonoVeterinario.fromJson(Map<String, dynamic> json) {
+    return BonoVeterinario(
+      // 🔧 OJO: ajusta estos nombres a las columnas reales de tu vista/tabla
+      id: json['Id'] ?? 0, // o 'Id_Veterinario' / 'Id_Bono', etc.
+      veterinario: json['Veterinario'] ?? '', // ej: nombre del vet
+      montoBono: (json['Monto_Bono'] ?? 0).toDouble(), // monto calculado
+      periodo: json['Periodo'] ?? '', // rango o mes del bono
     );
   }
 }
