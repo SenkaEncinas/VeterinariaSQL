@@ -12,9 +12,10 @@ class ClienteFamiliaScreen extends StatefulWidget {
 }
 
 class _ClienteFamiliaScreenState extends State<ClienteFamiliaScreen> {
-  final nombreCtrl = TextEditingController();
-  final apellidoCtrl = TextEditingController();
-  final dniCtrl = TextEditingController();
+  // Campos de la CABEZA de familia (coincide con el modelo)
+  final nombreCabezaCtrl = TextEditingController();
+  final apellidoCabezaCtrl = TextEditingController();
+  final dniCabezaCtrl = TextEditingController();
   final telefonoCtrl = TextEditingController();
   final emailCtrl = TextEditingController();
   final cuentaBancariaCtrl = TextEditingController();
@@ -32,13 +33,13 @@ class _ClienteFamiliaScreenState extends State<ClienteFamiliaScreen> {
 
     try {
       final request = ClienteFamiliaRequest(
-        apellidoCabeza: apellidoCtrl.text.trim(),
+        apellidoCabeza: apellidoCabezaCtrl.text.trim(),
         cuentaBancaria: cuentaBancariaCtrl.text.trim(),
         direccion: direccionCtrl.text.trim(),
         telefono: telefonoCtrl.text.trim(),
         email: emailCtrl.text.trim(),
-        dniCabeza: dniCtrl.text.trim(),
-        nombreCabeza: nombreCtrl.text.trim(),
+        dniCabeza: dniCabezaCtrl.text.trim(),
+        nombreCabeza: nombreCabezaCtrl.text.trim(),
       );
 
       final mensaje = await _gestionService.registrarFamilia(request);
@@ -52,9 +53,9 @@ class _ClienteFamiliaScreenState extends State<ClienteFamiliaScreen> {
       );
 
       // Limpiar campos
-      nombreCtrl.clear();
-      apellidoCtrl.clear();
-      dniCtrl.clear();
+      nombreCabezaCtrl.clear();
+      apellidoCabezaCtrl.clear();
+      dniCabezaCtrl.clear();
       telefonoCtrl.clear();
       emailCtrl.clear();
       cuentaBancariaCtrl.clear();
@@ -76,9 +77,9 @@ class _ClienteFamiliaScreenState extends State<ClienteFamiliaScreen> {
 
   @override
   void dispose() {
-    nombreCtrl.dispose();
-    apellidoCtrl.dispose();
-    dniCtrl.dispose();
+    nombreCabezaCtrl.dispose();
+    apellidoCabezaCtrl.dispose();
+    dniCabezaCtrl.dispose();
     telefonoCtrl.dispose();
     emailCtrl.dispose();
     cuentaBancariaCtrl.dispose();
@@ -172,8 +173,8 @@ class _ClienteFamiliaScreenState extends State<ClienteFamiliaScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             _buildTextField(
-                              "Nombre",
-                              nombreCtrl,
+                              "Nombre cabeza de familia",
+                              nombreCabezaCtrl,
                               icon: Icons.person,
                               validator: (v) => v == null || v.isEmpty
                                   ? 'Ingrese el nombre'
@@ -181,8 +182,8 @@ class _ClienteFamiliaScreenState extends State<ClienteFamiliaScreen> {
                             ),
                             const SizedBox(height: 15),
                             _buildTextField(
-                              "Apellido",
-                              apellidoCtrl,
+                              "Apellido cabeza de familia",
+                              apellidoCabezaCtrl,
                               icon: Icons.person_outline,
                               validator: (v) => v == null || v.isEmpty
                                   ? 'Ingrese el apellido'
@@ -190,8 +191,8 @@ class _ClienteFamiliaScreenState extends State<ClienteFamiliaScreen> {
                             ),
                             const SizedBox(height: 15),
                             _buildTextField(
-                              "DNI",
-                              dniCtrl,
+                              "DNI cabeza de familia",
+                              dniCabezaCtrl,
                               icon: Icons.badge,
                               keyboardType: TextInputType.number,
                               validator: (v) => v == null || v.isEmpty
@@ -200,7 +201,7 @@ class _ClienteFamiliaScreenState extends State<ClienteFamiliaScreen> {
                             ),
                             const SizedBox(height: 15),
                             _buildTextField(
-                              "Teléfono",
+                              "Teléfono contacto principal",
                               telefonoCtrl,
                               icon: Icons.phone,
                               keyboardType: TextInputType.phone,
@@ -210,7 +211,7 @@ class _ClienteFamiliaScreenState extends State<ClienteFamiliaScreen> {
                             ),
                             const SizedBox(height: 15),
                             _buildTextField(
-                              "Email",
+                              "Email contacto principal",
                               emailCtrl,
                               icon: Icons.email,
                               keyboardType: TextInputType.emailAddress,
@@ -235,7 +236,7 @@ class _ClienteFamiliaScreenState extends State<ClienteFamiliaScreen> {
                             ),
                             const SizedBox(height: 15),
                             _buildTextField(
-                              "Dirección",
+                              "Dirección de la familia",
                               direccionCtrl,
                               icon: Icons.location_city,
                               validator: (v) => v == null || v.isEmpty

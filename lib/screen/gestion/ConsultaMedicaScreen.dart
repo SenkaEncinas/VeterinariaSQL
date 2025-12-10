@@ -10,11 +10,9 @@ class ConsultaMedicaScreen extends StatefulWidget {
 }
 
 class _ConsultaMedicaScreenState extends State<ConsultaMedicaScreen> {
-  // Controllers
+  // Controllers SOLO para los campos del modelo
   final idMascotaCtrl = TextEditingController();
   final idVeterinarioCtrl = TextEditingController();
-  final fechaCtrl = TextEditingController();
-  final motivoCtrl = TextEditingController();
   final diagnosticoCtrl = TextEditingController();
   final tratamientoCtrl = TextEditingController();
   final temperaturaCtrl = TextEditingController();
@@ -35,9 +33,7 @@ class _ConsultaMedicaScreenState extends State<ConsultaMedicaScreen> {
       final request = ConsultaMedicaRequest(
         idMascota: int.parse(idMascotaCtrl.text.trim()),
         idVeterinario: int.parse(idVeterinarioCtrl.text.trim()),
-        // Incluyo motivo y fecha dentro del diagnóstico para no perderlos
-        diagnostico:
-            'Fecha: ${fechaCtrl.text.trim()} | Motivo: ${motivoCtrl.text.trim()} | Dx: ${diagnosticoCtrl.text.trim()}',
+        diagnostico: diagnosticoCtrl.text.trim(),
         tratamiento: tratamientoCtrl.text.trim(),
         temperatura: double.parse(temperaturaCtrl.text.trim()),
         costo: double.parse(costoCtrl.text.trim()),
@@ -58,8 +54,6 @@ class _ConsultaMedicaScreenState extends State<ConsultaMedicaScreen> {
       // Limpiar campos
       idMascotaCtrl.clear();
       idVeterinarioCtrl.clear();
-      fechaCtrl.clear();
-      motivoCtrl.clear();
       diagnosticoCtrl.clear();
       tratamientoCtrl.clear();
       temperaturaCtrl.clear();
@@ -86,8 +80,6 @@ class _ConsultaMedicaScreenState extends State<ConsultaMedicaScreen> {
   void dispose() {
     idMascotaCtrl.dispose();
     idVeterinarioCtrl.dispose();
-    fechaCtrl.dispose();
-    motivoCtrl.dispose();
     diagnosticoCtrl.dispose();
     tratamientoCtrl.dispose();
     temperaturaCtrl.dispose();
@@ -210,19 +202,6 @@ class _ConsultaMedicaScreenState extends State<ConsultaMedicaScreen> {
                                 }
                                 return null;
                               },
-                            ),
-                            const SizedBox(height: 15),
-                            _buildTextField(
-                              "Fecha de Consulta",
-                              fechaCtrl,
-                              keyboardType: TextInputType.datetime,
-                              icon: Icons.date_range,
-                            ),
-                            const SizedBox(height: 15),
-                            _buildTextField(
-                              "Motivo de la Consulta",
-                              motivoCtrl,
-                              icon: Icons.info,
                             ),
                             const SizedBox(height: 15),
                             _buildTextField(
