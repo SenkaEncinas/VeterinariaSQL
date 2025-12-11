@@ -15,7 +15,7 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFFFFFFF), // blanco
       appBar: AppBar(
         title: const Text(
-          '🐾 Veterinaria Care',
+          '🐾 Cesarin y sus amigos',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
         ),
         backgroundColor: const Color(0xFF7289DA), // azul principal

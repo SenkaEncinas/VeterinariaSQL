@@ -39,32 +39,141 @@ class _SeguimientoVisitasScreenState extends State<SeguimientoVisitasScreen> {
     );
   }
 
+  Color _colorEstado(String estado) {
+    switch (estado.toLowerCase()) {
+      case 'completada':
+      case 'completado':
+        return Colors.green;
+      case 'pendiente':
+        return Colors.orangeAccent;
+      case 'cancelada':
+      case 'cancelado':
+        return Colors.redAccent;
+      default:
+        return const Color(0xFF007D8F);
+    }
+  }
+
   Widget _buildList() {
     if (items.isEmpty) {
       return const Padding(
         padding: EdgeInsets.only(top: 20),
-        child: Text(
-          "No hay datos para mostrar.",
-          textAlign: TextAlign.center,
+        child: Center(
+          child: Text(
+            "No hay datos para mostrar.",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey),
+          ),
         ),
       );
     }
 
-    // TODO texto plano, sin colores ni chips ni tarjetas estilizadas
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: items.map((visita) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Text(
-            // Cada registro como un bloque de texto
-            'ID Adopción: ${visita.idAdopcion}\n'
-            'Mascota: ${visita.mascota}\n'
-            'Familia adoptante: ${visita.familiaAdoptante}\n'
-            'Fecha visita: ${visita.fechaVisita}\n'
-            'Quien visitó: ${visita.quienVisito}\n'
-            'Resultado: ${visita.resultado}\n'
-            'Estado visita: ${visita.estadoVisita}\n',
+        return Card(
+          elevation: 4,
+          shadowColor: Colors.black12,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 10,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Mascota y familia
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.pets,
+                      size: 22,
+                      color: Color(0xFF007D8F),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '${visita.mascota} - ${visita.familiaAdoptante}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+
+                // ID adopción + fecha
+                Text(
+                  "ID Adopción: ${visita.idAdopcion}",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+                Text(
+                  "Fecha visita: ${visita.fechaVisita}",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 4),
+
+                // Quien visitó
+                Text(
+                  "Quien visitó: ${visita.quienVisito}",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 6),
+
+                // Resultado
+                const Text(
+                  "Resultado:",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  visita.resultado,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Estado visita
+                Row(
+                  children: [
+                    const Text(
+                      "Estado visita: ",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Chip(
+                      label: Text(
+                        visita.estadoVisita,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      backgroundColor: _colorEstado(visita.estadoVisita),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       }).toList(),
@@ -74,15 +183,68 @@ class _SeguimientoVisitasScreenState extends State<SeguimientoVisitasScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // fondo normal
+      backgroundColor: const Color(0xFFE8F0F2),
       appBar: AppBar(
         title: const Text("Seguimiento de Visitas"),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF007D8F),
+        elevation: 0,
       ),
       body: loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFF007D8F)),
+            )
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: _buildList(),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Header con diseño de siempre
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF7289DA), Color(0xFF007D8F)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: const [
+                        Icon(
+                          Icons.track_changes,
+                          size: 50,
+                          color: Colors.white,
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          "Seguimiento de Visitas",
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          "Consulta visitas, seguimientos y controles.",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white70,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  _buildList(),
+                ],
+              ),
             ),
     );
   }
