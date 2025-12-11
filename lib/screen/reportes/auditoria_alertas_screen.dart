@@ -26,7 +26,6 @@ class _AuditoriaAlertasScreenState extends State<AuditoriaAlertasScreen> {
     setState(() => loading = true);
 
     try {
-      // Debe devolver List<ReporteAuditoria>
       final data = await _service.getAuditoriaAlertas();
       setState(() => items = data);
     } catch (e) {
@@ -59,7 +58,7 @@ class _AuditoriaAlertasScreenState extends State<AuditoriaAlertasScreen> {
       );
     }
 
-    // Solo tarjetas con los strings tal cual
+    // Tarjetas simples con los strings tal cual
     return Column(
       children: items.map((reporte) {
         return Card(
@@ -76,7 +75,6 @@ class _AuditoriaAlertasScreenState extends State<AuditoriaAlertasScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Mascota
                 Text(
                   "Mascota: ${reporte.mascota}",
                   style: const TextStyle(
@@ -85,8 +83,6 @@ class _AuditoriaAlertasScreenState extends State<AuditoriaAlertasScreen> {
                   ),
                 ),
                 const SizedBox(height: 4),
-
-                // Gasto total (string)
                 Text(
                   "Gasto total: ${reporte.gastoTotal}",
                   style: const TextStyle(
@@ -94,8 +90,6 @@ class _AuditoriaAlertasScreenState extends State<AuditoriaAlertasScreen> {
                   ),
                 ),
                 const SizedBox(height: 4),
-
-                // Nivel de alerta (string)
                 Text(
                   "Nivel de alerta: ${reporte.nivelAlerta}",
                   style: const TextStyle(

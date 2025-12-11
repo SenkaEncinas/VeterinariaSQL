@@ -4,8 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:veterinaria/model/report.dart';
 
 class ReportesService {
-  // OJO: quité el doble espacio, y dejé la URL limpia.
-  // Si usas emulador Android, podrías necesitar: http://10.0.2.2:5260/api/Reportes
   final String _baseUrl = 'http://localhost:5260/api/Reportes';
 
   // ================== TOKEN & HEADERS ==================
@@ -109,7 +107,7 @@ class ReportesService {
   //   ...
   //   BonoVeterinario(...);
   //   factory BonoVeterinario.fromJson(Map<String, dynamic> json) => ...
-  // }
+  // 
   //
   // Cambia "BonoVeterinario" por el nombre real que uses.
   Future<List<BonoVeterinario>> getPagosBonificaciones() async {
