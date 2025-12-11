@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:veterinaria/service/reportes_service.dart';
-import 'package:veterinaria/model/report.dart'; // 👈 ajusta ruta si es diferente
+import 'package:veterinaria/model/report.dart'; // Debe contener ReporteAuditoria
 
 class AuditoriaAlertasScreen extends StatefulWidget {
   const AuditoriaAlertasScreen({super.key});
@@ -13,7 +13,7 @@ class _AuditoriaAlertasScreenState extends State<AuditoriaAlertasScreen> {
   final _service = ReportesService();
   bool loading = false;
 
-  // AHORA LISTA TIPADA
+  // Lista tipada
   List<ReporteAuditoria> items = [];
 
   @override
@@ -23,20 +23,29 @@ class _AuditoriaAlertasScreenState extends State<AuditoriaAlertasScreen> {
   }
 
   Future<void> _load() async {
+    if (!mounted) return;
     setState(() => loading = true);
+
     try {
-      // 👇 Esto debe devolver List<ReporteAuditoria>
+      // Debe devolver List<ReporteAuditoria>
       final data = await _service.getAuditoriaAlertas();
+      if (!mounted) return;
       setState(() => items = data);
     } catch (e) {
-      _showMessage(e.toString());
+      if (!mounted) return;
+      _showMessage("Error al obtener auditoría de alertas: $e");
+    } finally {
+      if (!mounted) return;
+      setState(() => loading = false);
     }
-    setState(() => loading = false);
   }
 
   void _showMessage(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: const Color(0xFF007D8F),
+      ),
     );
   }
 
@@ -60,9 +69,12 @@ class _AuditoriaAlertasScreenState extends State<AuditoriaAlertasScreen> {
     if (items.isEmpty) {
       return const Padding(
         padding: EdgeInsets.only(top: 20),
-        child: Text(
-          "No hay datos para mostrar.",
-          textAlign: TextAlign.center,
+        child: Center(
+          child: Text(
+            "No hay datos para mostrar.",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey),
+          ),
         ),
       );
     }
@@ -163,6 +175,7 @@ class _AuditoriaAlertasScreenState extends State<AuditoriaAlertasScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Header
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),

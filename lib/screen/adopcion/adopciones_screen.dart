@@ -39,6 +39,7 @@ class _AdopcionesScreenState extends State<AdopcionesScreen> {
     }
   }
 
+  /// 🔹 GET: obtiene las oportunidades de adopción desde el backend
   Future<void> _getOportunidades() async {
     setState(() => loading = true);
     try {
@@ -237,48 +238,113 @@ class _AdopcionesScreenState extends State<AdopcionesScreen> {
 
                   const SizedBox(height: 20),
 
-                  // Lista de oportunidades
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Wrap(
-                      spacing: 15,
-                      runSpacing: 15,
-                      children: oportunidades.map((o) {
-                        return SizedBox(
-                          width: size.width / (size.width > 600 ? 2.2 : 1),
-                          child: Card(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            elevation: 5,
-                            child: Padding(
-                              padding: const EdgeInsets.all(15),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "${o.interesado} busca ${o.loQueBusca}",
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
-                                      color: Color(0xFF007D8F),
+                  // ==========================
+                  // LISTA DE OPORTUNIDADES
+                  // ==========================
+                  if (oportunidades.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Text(
+                        "No hay oportunidades cargadas. Pulsa \"Ver Oportunidades\".",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    )
+                  else
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Wrap(
+                        spacing: 15,
+                        runSpacing: 15,
+                        children: oportunidades.map((o) {
+                          return SizedBox(
+                            width: size.width / (size.width > 600 ? 2.2 : 1),
+                            child: Card(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              elevation: 5,
+                              child: Padding(
+                                padding: const EdgeInsets.all(15),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Título principal
+                                    Text(
+                                      "${o.interesado} busca ${o.loQueBusca}",
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                        color: Color(0xFF007D8F),
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    "Mascota: ${o.mascotaDisponible}\nEspecie: ${o.especie}\nContacto: ${o.contacto}",
-                                    style: const TextStyle(
-                                      color: Colors.black87,
+                                    const SizedBox(height: 8),
+
+                                    // Detalle de la mascota
+                                    Text(
+                                      "Mascota: ${o.mascotaDisponible}",
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      "Especie: ${o.especie} | Raza: ${o.raza}",
+                                    ),
+                                    Text(
+                                      "Sexo: ${o.sexo} | Peso actual: ${o.pesoActual.toStringAsFixed(1)} kg",
+                                    ),
+                                    const SizedBox(height: 6),
+
+                                    // Información de la casa del interesado
+                                    if (o.suCasa.isNotEmpty)
+                                      Text(
+                                        "Su casa: ${o.suCasa}",
+                                        style: const TextStyle(
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+
+                                    const SizedBox(height: 6),
+
+                                    // Detalles de la mascota
+                                    if (o.detallesMascota.isNotEmpty)
+                                      Text(
+                                        "Detalles: ${o.detallesMascota}",
+                                        style: const TextStyle(
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+
+                                    const SizedBox(height: 8),
+
+                                    // Contacto
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.phone,
+                                          size: 18,
+                                          color: Color(0xFF007D8F),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Expanded(
+                                          child: Text(
+                                            o.contacto,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      }).toList(),
+                          );
+                        }).toList(),
+                      ),
                     ),
-                  ),
+
                   const SizedBox(height: 30),
                 ],
               ),

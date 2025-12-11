@@ -1,18 +1,28 @@
-// OportunidadAdopcion
+// models_reportes.dart
+
+/// Modelo para VW_OPORTUNIDADES_ADOPCION
 class OportunidadAdopcion {
-  final String interesado;
-  final String loQueBusca;
-  final String contacto;
-  final String mascotaDisponible;
-  final String especie;
-  final String detallesMascota;
+  final String interesado;        // Interesado
+  final String loQueBusca;        // Lo_Que_Busca
+  final String suCasa;            // Su_Casa
+  final String contacto;          // Contacto
+  final String mascotaDisponible; // Mascota_Disponible
+  final String especie;           // especie
+  final String raza;              // raza
+  final String sexo;              // sexo
+  final double pesoActual;        // peso_actual (DECIMAL en SQL)
+  final String detallesMascota;   // Detalles_Mascota
 
   OportunidadAdopcion({
     required this.interesado,
     required this.loQueBusca,
+    required this.suCasa,
     required this.contacto,
     required this.mascotaDisponible,
     required this.especie,
+    required this.raza,
+    required this.sexo,
+    required this.pesoActual,
     required this.detallesMascota,
   });
 
@@ -20,23 +30,27 @@ class OportunidadAdopcion {
     return OportunidadAdopcion(
       interesado: json['Interesado'] ?? '',
       loQueBusca: json['Lo_Que_Busca'] ?? '',
+      suCasa: json['Su_Casa'] ?? '',
       contacto: json['Contacto'] ?? '',
       mascotaDisponible: json['Mascota_Disponible'] ?? '',
-      especie: json['Especie'] ?? '',
+      especie: json['especie'] ?? '',
+      raza: json['raza'] ?? '',
+      sexo: json['sexo'] ?? '',
+      pesoActual: (json['peso_actual'] as num?)?.toDouble() ?? 0.0,
       detallesMascota: json['Detalles_Mascota'] ?? '',
     );
   }
 }
 
-// EstadoCuentaRescatado
+/// Modelo para VW_ESTADO_CUENTA_RESCATADOS
 class EstadoCuentaRescatado {
-  final int idMascota;
-  final String alias;
-  final String estadoAdopcion;
-  final double totalGastosMedicos;
-  final double totalGastosRefugio;
-  final double totalDonaciones;
-  final double saldoPendientePorCubrir;
+  final int idMascota;                  // id_mascota
+  final String alias;                   // alias
+  final String estadoAdopcion;          // estado_adopcion
+  final double totalGastosMedicos;      // Total_Gastos_Medicos
+  final double totalGastosRefugio;      // Total_Gastos_Refugio
+  final double totalDonaciones;         // Total_Donaciones
+  final double saldoPendientePorCubrir; // Saldo_Pendiente_Por_Cubrir
 
   EstadoCuentaRescatado({
     required this.idMascota,
@@ -50,48 +64,30 @@ class EstadoCuentaRescatado {
 
   factory EstadoCuentaRescatado.fromJson(Map<String, dynamic> json) {
     return EstadoCuentaRescatado(
-      idMascota: json['Id_Mascota'] ?? 0,
-      alias: json['Alias'] ?? '',
-      estadoAdopcion: json['Estado_Adopcion'] ?? '',
-      totalGastosMedicos: (json['Total_Gastos_Medicos'] ?? 0).toDouble(),
-      totalGastosRefugio: (json['Total_Gastos_Refugio'] ?? 0).toDouble(),
-      totalDonaciones: (json['Total_Donaciones'] ?? 0).toDouble(),
+      idMascota: (json['id_mascota'] ?? 0) as int,
+      alias: json['alias'] ?? '',
+      estadoAdopcion: json['estado_adopcion'] ?? '',
+      totalGastosMedicos:
+          (json['Total_Gastos_Medicos'] as num?)?.toDouble() ?? 0.0,
+      totalGastosRefugio:
+          (json['Total_Gastos_Refugio'] as num?)?.toDouble() ?? 0.0,
+      totalDonaciones:
+          (json['Total_Donaciones'] as num?)?.toDouble() ?? 0.0,
       saldoPendientePorCubrir:
-          (json['Saldo_Pendiente_Por_Cubrir'] ?? 0).toDouble(),
+          (json['Saldo_Pendiente_Por_Cubrir'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }
 
-// ReporteAuditoria
-class ReporteAuditoria {
-  final String mascota;
-  final double gastoTotal;
-  final String nivelAlerta;
-
-  ReporteAuditoria({
-    required this.mascota,
-    required this.gastoTotal,
-    required this.nivelAlerta,
-  });
-
-  factory ReporteAuditoria.fromJson(Map<String, dynamic> json) {
-    return ReporteAuditoria(
-      mascota: json['Mascota'] ?? '',
-      gastoTotal: (json['Gasto_Total'] ?? 0).toDouble(),
-      nivelAlerta: json['Nivel_Alerta'] ?? '',
-    );
-  }
-}
-
-// SeguimientoVisita
+/// Modelo para VW_SEGUIMIENTO_VISITAS
 class SeguimientoVisita {
-  final int idAdopcion;
-  final String familiaAdoptante;
-  final String mascota;
-  final DateTime fechaVisita;
-  final String quienVisito;
-  final String resultado;
-  final String estadoVisita;
+  final int idAdopcion;           // id_adopcion
+  final String familiaAdoptante;  // Familia_Adoptante
+  final String mascota;           // Mascota
+  final DateTime fechaVisita;     // fecha_visita
+  final String quienVisito;       // Quien_Visito
+  final String resultado;         // Resultado
+  final String estadoVisita;      // Estado_Visita
 
   SeguimientoVisita({
     required this.idAdopcion,
@@ -105,11 +101,12 @@ class SeguimientoVisita {
 
   factory SeguimientoVisita.fromJson(Map<String, dynamic> json) {
     return SeguimientoVisita(
-      idAdopcion: json['Id_Adopcion'] ?? 0,
+      idAdopcion: (json['id_adopcion'] ?? 0) as int,
       familiaAdoptante: json['Familia_Adoptante'] ?? '',
       mascota: json['Mascota'] ?? '',
       fechaVisita:
-          DateTime.tryParse(json['Fecha_Visita'] ?? '') ?? DateTime(2000),
+          DateTime.tryParse(json['fecha_visita']?.toString() ?? '') ??
+              DateTime(2000),
       quienVisito: json['Quien_Visito'] ?? '',
       resultado: json['Resultado'] ?? '',
       estadoVisita: json['Estado_Visita'] ?? '',
@@ -117,27 +114,52 @@ class SeguimientoVisita {
   }
 }
 
-// BonoVeterinario  (para api/Reportes/pagos-bonificaciones)
+/// Modelo para VW_BONOS_VETERINARIO
 class BonoVeterinario {
-  final int id;                // Id del registro o del veterinario
-  final String veterinario;    // Nombre del veterinario
-  final double montoBono;      // Monto a pagar
-  final String periodo;        // Ej: "2025-01", "Enero 2025"
+  final String nombre;                 // nombre
+  final String apellido;               // apellido
+  final int atencionesBonificables;    // atenciones_bonificables
+  final double totalBonoEstimado;      // total_bono_estimado
 
   BonoVeterinario({
-    required this.id,
-    required this.veterinario,
-    required this.montoBono,
-    required this.periodo,
+    required this.nombre,
+    required this.apellido,
+    required this.atencionesBonificables,
+    required this.totalBonoEstimado,
   });
 
   factory BonoVeterinario.fromJson(Map<String, dynamic> json) {
     return BonoVeterinario(
-      // 🔧 OJO: ajusta estos nombres a las columnas reales de tu vista/tabla
-      id: json['Id'] ?? 0, // o 'Id_Veterinario' / 'Id_Bono', etc.
-      veterinario: json['Veterinario'] ?? '', // ej: nombre del vet
-      montoBono: (json['Monto_Bono'] ?? 0).toDouble(), // monto calculado
-      periodo: json['Periodo'] ?? '', // rango o mes del bono
+      nombre: json['nombre'] ?? '',
+      apellido: json['apellido'] ?? '',
+      atencionesBonificables:
+          (json['atenciones_bonificables'] ?? 0) as int,
+      totalBonoEstimado:
+          (json['total_bono_estimado'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+
+  /// Útil para mostrar en la UI
+  String get veterinarioCompleto => '$nombre $apellido';
+}
+
+/// Modelo para reporte del cursor (ReporteAuditoria)
+class ReporteAuditoria {
+  final String mascota;     // Mascota
+  final double gastoTotal;  // Gasto_Total
+  final String nivelAlerta; // Nivel_Alerta
+
+  ReporteAuditoria({
+    required this.mascota,
+    required this.gastoTotal,
+    required this.nivelAlerta,
+  });
+
+  factory ReporteAuditoria.fromJson(Map<String, dynamic> json) {
+    return ReporteAuditoria(
+      mascota: json['Mascota'] ?? '',
+      gastoTotal: (json['Gasto_Total'] as num?)?.toDouble() ?? 0.0,
+      nivelAlerta: json['Nivel_Alerta'] ?? '',
     );
   }
 }

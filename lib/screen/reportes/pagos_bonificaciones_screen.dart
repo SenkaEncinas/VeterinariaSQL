@@ -71,7 +71,7 @@ class _PagosBonificacionesScreenState extends State<PagosBonificacionesScreen> {
                 ),
                 SizedBox(height: 6),
                 Text(
-                  'Consulta los montos de bonos calculados por periodo.',
+                  'Consulta los montos de bonos calculados.',
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 14,
@@ -146,8 +146,8 @@ class _PagosBonificacionesScreenState extends State<PagosBonificacionesScreen> {
                                 children: [
                                   // Nombre del veterinario
                                   Text(
-                                    bono.veterinario.isNotEmpty
-                                        ? bono.veterinario
+                                    bono.veterinarioCompleto.isNotEmpty
+                                        ? bono.veterinarioCompleto
                                         : 'Veterinario sin nombre',
                                     style: const TextStyle(
                                       color: Colors.white,
@@ -157,19 +157,17 @@ class _PagosBonificacionesScreenState extends State<PagosBonificacionesScreen> {
                                   ),
                                   const SizedBox(height: 6),
 
-                                  // Periodo
+                                  // Atenciones bonificables
                                   Row(
                                     children: [
                                       const Icon(
-                                        Icons.date_range,
+                                        Icons.healing,
                                         color: Colors.white70,
                                         size: 18,
                                       ),
                                       const SizedBox(width: 6),
                                       Text(
-                                        bono.periodo.isNotEmpty
-                                            ? bono.periodo
-                                            : 'Periodo no especificado',
+                                        'Atenciones bonificables: ${bono.atencionesBonificables}',
                                         style: const TextStyle(
                                           color: Colors.white70,
                                           fontSize: 13,
@@ -185,7 +183,7 @@ class _PagosBonificacionesScreenState extends State<PagosBonificacionesScreen> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       const Text(
-                                        'Monto del bono:',
+                                        'Monto del bono estimado:',
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 15,
@@ -193,7 +191,8 @@ class _PagosBonificacionesScreenState extends State<PagosBonificacionesScreen> {
                                         ),
                                       ),
                                       Text(
-                                        _formatearMonto(bono.montoBono),
+                                        _formatearMonto(
+                                            bono.totalBonoEstimado),
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 18,
@@ -201,17 +200,6 @@ class _PagosBonificacionesScreenState extends State<PagosBonificacionesScreen> {
                                         ),
                                       ),
                                     ],
-                                  ),
-
-                                  const SizedBox(height: 4),
-
-                                  // ID de referencia (opcional)
-                                  Text(
-                                    'ID referencia: ${bono.id}',
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 11,
-                                    ),
                                   ),
                                 ],
                               ),

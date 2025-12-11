@@ -8,7 +8,6 @@ import 'package:veterinaria/model/request.dart';
 class GestionService {
   final String _baseUrl =
       'http://localhost:5260/api/Gestion'; // Cambia al URL real
-//'https://10.0.2.2:5260/api/Gestion';
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
