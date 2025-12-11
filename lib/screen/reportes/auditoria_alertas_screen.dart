@@ -23,19 +23,15 @@ class _AuditoriaAlertasScreenState extends State<AuditoriaAlertasScreen> {
   }
 
   Future<void> _load() async {
-    if (!mounted) return;
     setState(() => loading = true);
 
     try {
       // Debe devolver List<ReporteAuditoria>
       final data = await _service.getAuditoriaAlertas();
-      if (!mounted) return;
       setState(() => items = data);
     } catch (e) {
-      if (!mounted) return;
       _showMessage("Error al obtener auditoría de alertas: $e");
     } finally {
-      if (!mounted) return;
       setState(() => loading = false);
     }
   }
@@ -47,22 +43,6 @@ class _AuditoriaAlertasScreenState extends State<AuditoriaAlertasScreen> {
         backgroundColor: const Color(0xFF007D8F),
       ),
     );
-  }
-
-  Color _colorNivel(String nivel) {
-    switch (nivel.toLowerCase()) {
-      case 'alto':
-      case 'alta':
-        return Colors.redAccent;
-      case 'medio':
-      case 'media':
-        return Colors.orangeAccent;
-      case 'bajo':
-      case 'baja':
-        return Colors.green;
-      default:
-        return const Color(0xFF007D8F);
-    }
   }
 
   Widget _buildList() {
@@ -79,6 +59,7 @@ class _AuditoriaAlertasScreenState extends State<AuditoriaAlertasScreen> {
       );
     }
 
+    // Solo tarjetas con los strings tal cual
     return Column(
       children: items.map((reporte) {
         return Card(
@@ -96,57 +77,30 @@ class _AuditoriaAlertasScreenState extends State<AuditoriaAlertasScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Mascota
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.pets,
-                      size: 20,
-                      color: Color(0xFF007D8F),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        reporte.mascota,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-
-                // Gasto total
                 Text(
-                  "Gasto total: \$${reporte.gastoTotal.toStringAsFixed(2)}",
+                  "Mascota: ${reporte.mascota}",
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+
+                // Gasto total (string)
+                Text(
+                  "Gasto total: ${reporte.gastoTotal}",
                   style: const TextStyle(
                     fontSize: 14,
                   ),
                 ),
                 const SizedBox(height: 4),
 
-                // Nivel de alerta
-                Row(
-                  children: [
-                    const Text(
-                      "Nivel de alerta: ",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Chip(
-                      label: Text(
-                        reporte.nivelAlerta,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      backgroundColor: _colorNivel(reporte.nivelAlerta),
-                    ),
-                  ],
+                // Nivel de alerta (string)
+                Text(
+                  "Nivel de alerta: ${reporte.nivelAlerta}",
+                  style: const TextStyle(
+                    fontSize: 14,
+                  ),
                 ),
               ],
             ),
